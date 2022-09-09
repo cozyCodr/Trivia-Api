@@ -75,11 +75,13 @@ def create_app(test_config=None):
     def get_questions():
         question_range = Question.query.order_by(Question.id).all()
         questions = paginate(request, question_range)
+        print(questions)
+        categories = Category.query.order_by(Category.id).all()
 
         return jsonify({
             "questions": questions,
             "total_questions": len(questions),
-            "categories": "",
+            "categories": categories,
             "current_category": "Unnassigned",
         })
     """
