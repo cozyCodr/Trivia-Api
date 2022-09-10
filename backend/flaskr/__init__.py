@@ -1,3 +1,4 @@
+import json
 import os
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -86,9 +87,6 @@ def create_app(test_config=None):
             all_questions = Question.query.order_by(Question.id).all()
             paginated_questions = paginate(request, all_questions)
 
-            # Grab data for all categories
-            select_categories = Category.query.order_by(Category.id).all()
-
             # Grab Current Category
             questions_category = Question.query.with_entities(
                 Question.category).order_by(Question.category).all()
@@ -96,7 +94,10 @@ def create_app(test_config=None):
                 for q_category in question:
                     current_category.append(q_category)
 
-            # add data to serializable object
+            # Grab data for all categories
+            select_categories = Category.query.order_by(Category.id).all()
+
+            # add data to all_categories dict
             for category in select_categories:
                 all_categories[category.id] = category.type
         except:
@@ -172,12 +173,40 @@ def create_app(test_config=None):
     Create a POST endpoint to get questions based on a search term.
     It should return any questions for whom the search term
     is a substring of the question.
-    
+
 
     TEST: Search by any phrase. The questions list will update to include
     only question that include that string within their question.
     Try using the word "title" to start.
     """
+    @app.route("/questions/find", methods=["POST"])
+    def search_question():
+        current_category = []
+        try:
+            # Get search term
+            data = request.get_json()
+            search_term = data.get("searchTerm")
+
+            # Create substring to search for and Search
+            sub_string = f'%{search_term}%'
+            all_questions = Question.query.order_by(Question.category).filter(Question.question.ilike(sub_string)).all()
+            paginated_questions = paginate(request, all_questions)
+
+            # Grab Current Category
+            questions_category = Question.query.with_entities(
+                Question.category).order_by(Question.category).all()
+            for question in questions_category:
+                for q_category in question:
+                    current_category.append(q_category)
+
+        except:
+            # Abort: Question not Found
+            abort(404)
+        return jsonify({
+            "questions": paginated_questions,
+            "total_questions": len(paginated_questions),
+            "current_category": current_category,
+        })
 
     """
     @TODO:
