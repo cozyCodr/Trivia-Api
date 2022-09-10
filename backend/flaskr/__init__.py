@@ -219,6 +219,7 @@ def create_app(test_config=None):
     @app.route("/categories/<int:id>/questions")
     def get_questions_by_category(id):
         try:
+            # Get questions by specified category id
             questions = Question.query.filter(Question.category == id)
             paginated_questions = paginate(request, questions)
         except:
@@ -240,7 +241,33 @@ def create_app(test_config=None):
     one question at a time is displayed, the user is allowed to answer
     and shown whether they were correct or not.
     """
+    @app.route("/quizzes", methods=["POST"])
+    def play_quiz():
+        # Get Quiz Params, if empty none
+        data = request.get_json()
+        previous_questions = data.get("previous_questions")
+        category = data.get("quiz_category")
 
+        try:
+            # If Category is ALL, 
+            if category['id'] == 0:
+                questions = Question.query.order_by(Question.id).all()
+            # If Category is Specific,
+            elif (int(category['id']) in range(7)) and (int(category['id']) != 0):
+                questions = Question.query.order_by(Question.id).filter(Question.category==int(category['id'])).all()
+            # Select next batch of questions
+            question_range = [question.format() for question in questions if question.id not in previous_questions]
+            if len(question_range) == 0: 
+                return jsonify({
+                    'success': False,
+                    'question': False
+                    })
+            return jsonify({
+                    'success':True,
+                    'question': random.choice(question_range) # Randomize Question Selection
+                })
+        except:
+            abort(400)
     """
     @TODO:
     Create error handlers for all expected errors
