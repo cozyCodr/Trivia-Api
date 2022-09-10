@@ -115,6 +115,18 @@ def create_app(test_config=None):
     TEST: When you click the trash icon next to a question, the question will be removed.
     This removal will persist in the database and when you refresh the page.
     """
+    @app.route("/question/<int:id>", methods=["DELETE"])
+    def delete_question(id):
+        try:
+            # Get question by Id and delete
+            question = Question.query.get(id)
+            question.delete()
+        except:
+            # Abort: Unprocessable if unable to delete
+            abort(422)
+        return jsonify({
+            "success": True
+        })
 
     """
     @TODO:
@@ -126,12 +138,41 @@ def create_app(test_config=None):
     the form will clear and the question will appear at the end of the last page
     of the questions list in the "List" tab.
     """
+    @app.route("/question", methods=["POST"])
+    def post_question():
+        try:
+            # Get form data
+            data = request.get_json()
+
+            # Extract data
+            question = data.get("question")
+            answer = data.get("answer")
+            category = data.get("category")
+            difficulty = data.get("difficulty")
+
+            # Make new question
+            new_question = Question(
+                question = question, 
+                answer=answer, 
+                category=category, 
+                difficulty=difficulty
+            )
+
+            # Serialize Question
+            new_question.insert()
+        except:
+            # Abort: Unprocessable if unable to save
+            abort(422)
+        return jsonify({
+            "success": True,
+        })
 
     """
     @TODO:
     Create a POST endpoint to get questions based on a search term.
     It should return any questions for whom the search term
     is a substring of the question.
+    
 
     TEST: Search by any phrase. The questions list will update to include
     only question that include that string within their question.
