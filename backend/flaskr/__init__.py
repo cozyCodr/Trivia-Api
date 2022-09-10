@@ -28,20 +28,18 @@ def create_app(test_config=None):
     """
     @TODO: Set up CORS. Allow '*' for origins. Delete the sample route after completing the TODOs
     """
-    CORS(app)
+    CORS(app, resources={r"/api/*": {"origins": "*"}})
 
     """
     @TODO: Use the after_request decorator to set Access-Control-Allow
     """
     @app.after_request
     def after_request(response):
-        response.headers.add(
-            "Access-Control-Allow-Headers", "Content-Tpe, Authorization,true")
-        response.headers.add(
-            "Access-Control-Allow-Methods", "GET,PUT,POST,DELETE,OPTIONS"
-        )
+        response.headers.add('Access-Control-Allow-Headers',
+                             'Content-Type, Authorization,true')
+        response.headers.add('Access-Control-Allow-Methods',
+                             'GET, POST, PATCH, DELETE, OPTIONS')
         return response
-
     """
     @TODO:
     Create an endpoint to handle GET requests
@@ -49,14 +47,21 @@ def create_app(test_config=None):
     """
     @app.route("/categories", methods=["GET"])
     def get_categories():
+        # Custom dict to hold looped query results
+        all_categories = {}
         try:
-            categories = Category.query.order_by("Category.id").all()
+            # Grab all categories
+            select = Category.query.order_by(Category.id).all()
+
+            # Add category to all_categories dict
+            for category in select:
+                all_categories[category.id] = category.type
         except:
             # Resource Not found
-            abort(405)
+            abort(404)
         return jsonify({
+            "categories": all_categories,
             "success": True,
-            "categories": categories.format()
         })
 
     """
@@ -73,16 +78,35 @@ def create_app(test_config=None):
     """
     @app.route("/questions", methods=["GET"])
     def get_questions():
-        question_range = Question.query.order_by(Question.id).all()
-        questions = paginate(request, question_range)
-        print(questions)
-        categories = Category.query.order_by(Category.id).all()
+        all_categories = {}
+        current_category = []
 
+        try:
+            #   Grab all questions and restrict to slice
+            all_questions = Question.query.order_by(Question.id).all()
+            paginated_questions = paginate(request, all_questions)
+
+            # Grab data for all categories
+            select_categories = Category.query.order_by(Category.id).all()
+
+            # Grab Current Category
+            questions_category = Question.query.with_entities(
+                Question.category).order_by(Question.category).all()
+            for question in questions_category:
+                for q_category in question:
+                    current_category.append(q_category)
+
+            # add data to serializable object
+            for category in select_categories:
+                all_categories[category.id] = category.type
+        except:
+            abort(404)
         return jsonify({
-            "questions": questions,
-            "total_questions": len(questions),
-            "categories": categories,
-            "current_category": "Unnassigned",
+            "questions": paginated_questions,
+            "total_questions": len(all_questions),
+            "categories": all_categories,
+            "current_category": current_category,
+            "success": True,
         })
     """
     @TODO:
