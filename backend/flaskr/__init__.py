@@ -101,7 +101,7 @@ def create_app(test_config=None):
             for category in select_categories:
                 all_categories[category.id] = category.type
         except:
-            abort(404)
+            abort(405)
         return jsonify({
             "questions": paginated_questions,
             "total_questions": len(all_questions),

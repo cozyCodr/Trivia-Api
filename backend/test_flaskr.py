@@ -41,7 +41,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['categories'])
         self.assertEqual(data["success"], True)
 
-    def test_405_method_no_allowed_get_categories(self):
+    def test_405_on_get_categories(self):
         res = self.client().post('/categories')
         data = json.loads(res.data)
 
@@ -59,8 +59,13 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['categories'])
         self.assertTrue(data['current_category'])
     
-
-
+    def test_405_on_get_questions(self):
+        res = self.client().put("/questions")
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 405)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'method not allowed')
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
