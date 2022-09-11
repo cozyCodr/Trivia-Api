@@ -58,8 +58,8 @@ def create_app(test_config=None):
             for category in select:
                 all_categories[category.id] = category.type
         except:
-            # Resource Not found
-            abort(404)
+            # Method not Allowed
+            abort(405)
         return jsonify({
             "categories": all_categories,
             "success": True,
