@@ -139,7 +139,7 @@ def create_app(test_config=None):
     the form will clear and the question will appear at the end of the last page
     of the questions list in the "List" tab.
     """
-    @app.route("/question", methods=["POST"])
+    @app.route("/questions", methods=["POST"])
     def post_question():
         try:
             # Get form data
@@ -203,6 +203,7 @@ def create_app(test_config=None):
             # Abort: Question not Found
             abort(404)
         return jsonify({
+            "success": True,
             "questions": paginated_questions,
             "total_questions": len(paginated_questions),
             "current_category": current_category,
