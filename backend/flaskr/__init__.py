@@ -274,43 +274,43 @@ def create_app(test_config=None):
     including 404 and 422.
     """
     @app.errorhandler(400)
-    def bad_request():
+    def bad_request(error):
         return jsonify({
             "message": "bad request",
             "error": 400,
             "success": False
-        })
+        }), 400
     
     @app.errorhandler(422)
-    def unprocessable():
+    def unprocessable(error):
         return jsonify({
             "message": "Unproccessable",
             "error": 422,
             "success": False
-        })
+        }), 422
 
     @app.errorhandler(404)
-    def not_found():
+    def not_found(error):
         return jsonify({
             "message": "resource not found",
             "error": 404,
             "success": False
-        })
+        }), 404
 
     @app.errorhandler(500)
-    def internal_server_error():
+    def internal_server_error(error):
         return jsonify({
             "message": "internal server error",
             "error": 500,
             "success": False
-        })
+        }), 500
 
     @app.errorhandler(405)
-    def method_not_allowed():
+    def method_not_allowed(error):
         return jsonify({
             "message": "method not allowed",
             "error": 405,
             "success": False
-        })
+        }), 405
 
     return app
