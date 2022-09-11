@@ -66,6 +66,14 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['current_category'], 1)
         self.assertTrue(len(data['questions']))
 
+    def test_405_on_get_questions_by_category(self):
+        res = self.client().post('/categories/1/questions')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 405)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'method not allowed')
+
     def test_get_questions(self):
         res = self.client().get("/questions")
         data = json.loads(res.data)

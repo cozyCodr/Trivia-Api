@@ -223,8 +223,9 @@ def create_app(test_config=None):
             questions = Question.query.filter(Question.category == id)
             paginated_questions = paginate(request, questions)
         except:
-            abort(404)
+            abort(405)
         return jsonify({
+            "success": True,
             "questions": paginated_questions,
             "total_questions": len(paginated_questions),
             "current_category": id,
